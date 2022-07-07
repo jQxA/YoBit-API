@@ -191,10 +191,23 @@ class _YoBitPrivate(_YoBitPublic):
         sign = hmac.new(self._api_secret.encode(), urlencode(options).encode(), hashlib.sha512)
         headers = dict({'Key': self._api_key,
                         'Sign': sign.hexdigest()})
+
         try:
-            return requests.post(self.url + self._api_private_url, data=options, headers=headers).json()
+            return self.result(requests.post(self.url + self._api_private_url, data=options, headers=headers).json())
         except ValueError as ex:
             raise Exception(f'Exchange has not responded with JSON: {ex}')
+
+    """
+        Returns only the api query result
+        Returns None if an error occurs.
+    """
+    @staticmethod
+    def result(request: dict):
+        if request.get('success'):
+            return request.get('return')
+        else:
+            print(request)
+            return None
 
     """
         Generate nonce
